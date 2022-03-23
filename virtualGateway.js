@@ -17,20 +17,16 @@ noiseOffset = (baseValue, magnitude, step, limits) => {
   }
 };
 
-async function transmit() {
+async function transmit(nodeSerial) {
   try {
     let noiseStep = 0;
 
     for (;;) {
       let datetime = new Date();
 
-      fetch("http://localhost:8000/readings", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JOSN.stringify({
-          nodeSerial: "ABCD",
+      axios
+        .post("https://vitaband.herokuapp.com/readings", {
+          nodeSerial: nodeSerial,
           temperature: noiseOffset(31.51, 20, noiseStep, [27, 45]),
           spo2: noiseOffset(90, 20, noiseStep, [0, 100]),
           hr: noiseOffset(60, 20, noiseStep, [60, 200]),
@@ -45,8 +41,7 @@ async function transmit() {
           cough: "0",
           ir: noiseOffset(203177, 1000, noiseStep, [0, 250000]),
           battery: 99,
-        }),
-      })
+        })
         .then(function (response) {
           console.log(response.data);
         })
@@ -55,7 +50,7 @@ async function transmit() {
         });
 
       noiseStep += 0.1;
-      await timer(2000);
+      await timer(1000);
       // break;
     }
   } catch (e) {
@@ -63,4 +58,6 @@ async function transmit() {
   }
 }
 
-transmit();
+//VIRTUAL NODE INSTANCES
+transmit("ABCD");
+// transmit("1234");
