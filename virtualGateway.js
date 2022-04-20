@@ -3,6 +3,9 @@ const perlinNoise3d = require("perlin-noise-3d");
 
 const timer = (ms) => new Promise((res) => setTimeout(res, ms));
 const noise = new perlinNoise3d();
+const URL = "https://vitaband.herokuapp.com";
+const realEndpoint = "/readings";
+const testEndpoint = "/test/postRead";
 noise.noiseSeed(Math.E);
 
 noiseOffset = (baseValue, magnitude, step, limits) => {
@@ -21,14 +24,16 @@ async function transmit(nodeSerial) {
   try {
     let noiseStep = 0;
 
-    for (;;) {
+    for (let i = 0; i < 20; i++) {
       let datetime = new Date();
+      console.log(datetime.toLocaleString());
 
       axios
-        .post("https://vitaband.herokuapp.com/readings", {
+        .post(URL + testEndpoint, {
           nodeSerial: nodeSerial,
-          temperature: noiseOffset(31.51, 20, noiseStep, [27, 45]),
-          spo2: noiseOffset(90, 20, noiseStep, [0, 100]),
+          heartRate: noiseOffset(78, 20, noiseStep, [60, 99]),
+          temperature: noiseOffset(31.51, 20, noiseStep + 1, [27, 45]),
+          spo2: noiseOffset(90, 20, noiseStep + 2, [0, 100]),
           hr: noiseOffset(60, 20, noiseStep, [60, 200]),
           lat: 14.837921,
           lng: 120.792356,
@@ -50,7 +55,7 @@ async function transmit(nodeSerial) {
         });
 
       noiseStep += 0.1;
-      await timer(1000);
+      await timer(2000);
       // break;
     }
   } catch (e) {
@@ -59,5 +64,6 @@ async function transmit(nodeSerial) {
 }
 
 //VIRTUAL NODE INSTANCES
-transmit("ABCD");
-// transmit("1234");
+transmit("01");
+// transmit("02");
+// transmit("03");
