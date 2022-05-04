@@ -4,6 +4,7 @@ const perlinNoise3d = require("perlin-noise-3d");
 const timer = (ms) => new Promise((res) => setTimeout(res, ms));
 const noise = new perlinNoise3d();
 const URL = "https://vitaband.herokuapp.com";
+// const URL = "http://localhost:8000";
 const realEndpoint = "/readings";
 const testEndpoint = "/test/postRead";
 noise.noiseSeed(Math.E);
@@ -24,7 +25,7 @@ async function transmit(nodeSerial) {
   try {
     let noiseStep = 0;
 
-    for (let i = 0; i < 20; i++) {
+    for (;;) {
       let datetime = new Date();
       console.log(datetime.toLocaleString());
 
@@ -39,12 +40,12 @@ async function transmit(nodeSerial) {
           lng: 120.792356,
           date: `${
             datetime.getMonth() + 1
-          }/${datetime.getDate()}/${datetime.getYear()}`,
+          }/${datetime.getDate()}/${2022}`,
           time: `${
             datetime.getHours() + 1
           }:${datetime.getMinutes()}:${datetime.getSeconds()}`,
-          cough: "0",
-          ir: noiseOffset(203177, 1000, noiseStep, [0, 250000]),
+          cough: Math.round(noiseOffset(0, 1, noiseStep + 1, [0, 1])),
+          ir: noiseOffset(20000, 30000, noiseStep, [20000, 50000]),
           battery: 99,
         })
         .then(function (response) {
@@ -55,7 +56,7 @@ async function transmit(nodeSerial) {
         });
 
       noiseStep += 0.1;
-      await timer(2000);
+      await timer(4000);
       // break;
     }
   } catch (e) {
@@ -64,6 +65,6 @@ async function transmit(nodeSerial) {
 }
 
 //VIRTUAL NODE INSTANCES
-transmit("01");
-// transmit("02");
-// transmit("03");
+// transmit("01");
+transmit("02");
+transmit("03");
