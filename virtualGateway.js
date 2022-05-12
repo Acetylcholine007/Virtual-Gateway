@@ -4,9 +4,6 @@ const perlinNoise3d = require("perlin-noise-3d");
 const timer = (ms) => new Promise((res) => setTimeout(res, ms));
 const noise = new perlinNoise3d();
 const URL = "https://vitaband.herokuapp.com";
-// const URL = "http://localhost:8000";
-const realEndpoint = "/readings";
-const testEndpoint = "/test/postRead";
 noise.noiseSeed(Math.E);
 
 noiseOffset = (baseValue, magnitude, step, limits) => {
@@ -21,7 +18,11 @@ noiseOffset = (baseValue, magnitude, step, limits) => {
   }
 };
 
-async function transmit(nodeSerial) {
+function fetchEndpoint(gatewaySerial) {
+  return axios.get(`${URL}/gateways/getGatewayInfo/${gatewaySerial}`);
+}
+
+async function transmit(nodeSerial, endpoint) {
   try {
     let noiseStep = 0;
 
@@ -30,21 +31,18 @@ async function transmit(nodeSerial) {
       console.log(datetime.toLocaleString());
 
       axios
-        .post(URL + testEndpoint, {
+        .post(endpoint, {
           nodeSerial: nodeSerial,
-          heartRate: noiseOffset(78, 20, noiseStep, [60, 99]),
-          temperature: noiseOffset(31.51, 20, noiseStep + 1, [27, 45]),
-          spo2: noiseOffset(90, 20, noiseStep + 2, [0, 100]),
-          hr: noiseOffset(60, 20, noiseStep, [60, 200]),
+          heartRate: Math.round(noiseOffset(58, 50, noiseStep, [58, 110])),
+          temperature: noiseOffset(35, 5, noiseStep + 1, [35, 40]),
+          spo2: Math.round(noiseOffset(90, 10, noiseStep + 2, [90, 100])),
           lat: 14.837921,
           lng: 120.792356,
-          date: `${
-            datetime.getMonth() + 1
-          }/${datetime.getDate()}/${2022}`,
+          date: `${datetime.getMonth() + 1}/${datetime.getDate()}/${2022}`,
           time: `${
             datetime.getHours() + 1
           }:${datetime.getMinutes()}:${datetime.getSeconds()}`,
-          cough: Math.round(noiseOffset(0, 1, noiseStep + 1, [0, 1])),
+          cough: Math.round(noiseOffset(0, 1, noiseStep + 20, [0, 1])),
           ir: noiseOffset(20000, 30000, noiseStep, [20000, 50000]),
           battery: 99,
         })
@@ -64,7 +62,14 @@ async function transmit(nodeSerial) {
   }
 }
 
-//VIRTUAL NODE INSTANCES
-// transmit("01");
-transmit("02");
-transmit("03");
+fetchEndpoint("AAAA")
+  .then(function (response) {
+    let endpoint = response.data.endpoint;
+
+    // transmit("01", endpoint);
+    transmit("02", endpoint);
+    transmit("03", endpoint);
+  })
+  .catch(function (error) {
+    console.log(error);
+  });
