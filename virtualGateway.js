@@ -36,8 +36,8 @@ async function transmit(nodeSerial, endpoint) {
           heartRate: Math.round(noiseOffset(58, 50, noiseStep, [58, 110])),
           temperature: noiseOffset(35, 5, noiseStep + 1, [35, 40]),
           spo2: Math.round(noiseOffset(90, 10, noiseStep + 2, [90, 100])),
-          lat: 14.837921,
-          lng: 120.792356,
+          lat: 14.84754856499063,
+          lng: 120.76263597602494,
           date: `${datetime.getMonth() + 1}/${datetime.getDate()}/${2022}`,
           time: `${
             datetime.getHours() + 1
@@ -62,11 +62,11 @@ async function transmit(nodeSerial, endpoint) {
   }
 }
 
-fetchEndpoint("AAAA")
+fetchEndpoint("ABCD")
   .then(function (response) {
     let endpoint = response.data.endpoint;
 
-    // transmit("01", endpoint);
+    transmit("01", endpoint);
     transmit("02", endpoint);
     transmit("03", endpoint);
   })
